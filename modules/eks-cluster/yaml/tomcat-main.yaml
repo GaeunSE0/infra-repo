@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main-was
+  namespace: backend 
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: main-was
+  template:
+    metadata:
+      labels:
+        app: main-was
+    spec:
+      containers:
+      - image: 058264269986.dkr.ecr.ap-northeast-2.amazonaws.com/main_tomcat:v4.2
+        name: main-was
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 10m
+            memory: 50Mi
+      nodeSelector:
+        web: main
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: main-svc
+  namespace: backend
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: main-was
+  type: ClusterIP
+  clusterIP: 172.20.0.100

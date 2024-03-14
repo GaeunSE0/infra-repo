@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-web
+  namespace: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: user-web
+  template:
+    metadata:
+      labels:
+        app: user-web
+    spec:
+      containers:
+      - name: user-web
+        image: 058264269986.dkr.ecr.ap-northeast-2.amazonaws.com/user_nginx:v1.0
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 10m
+            memory: 50Mi
+        volumeMounts:
+        - name: user-storage
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: user-storage
+        persistentVolumeClaim:
+          claimName: user-pvc
+      nodeSelector:
+        web: main
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-svc
+  namespace: frontend
+spec:
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30130
+  selector:
+    app: user-web

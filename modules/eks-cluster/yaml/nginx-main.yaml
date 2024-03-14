@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main-web
+  namespace: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: main-web
+  template:
+    metadata:
+      labels:
+        app: main-web
+    spec:
+      containers:
+      - name: main-web
+        image: 058264269986.dkr.ecr.ap-northeast-2.amazonaws.com/main_nginx:v1.0 
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 10m
+            memory: 50Mi
+        volumeMounts:
+          - name: main-storage
+            mountPath: /usr/share/nginx/html
+      volumes:
+        - name: main-storage
+          persistentVolumeClaim:
+            claimName: main-pvc
+      nodeSelector:
+        web: main
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: main-svc
+  namespace: frontend
+spec:
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30110
+  selector:
+    app: main-web

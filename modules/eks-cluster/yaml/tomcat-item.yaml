@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: item-was
+  namespace: backend 
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: item-was
+  template:
+    metadata:
+      labels:
+        app: item-was
+    spec:
+      containers:
+      - image: 058264269986.dkr.ecr.ap-northeast-2.amazonaws.com/item_tomcat:v4.2
+        name: item-was
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 10m
+            memory: 50Mi
+      nodeSelector:
+        web: item
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: item-svc
+  namespace: backend
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: item-was
+  type: ClusterIP
+  clusterIP: 172.20.0.200

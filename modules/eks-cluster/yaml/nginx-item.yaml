@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: item-web
+  namespace: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: item-web
+  template:
+    metadata:
+      labels:
+        app: item-web
+    spec:
+      containers:
+      - name: item-web
+        image: 058264269986.dkr.ecr.ap-northeast-2.amazonaws.com/item_nginx:v1.0 
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 10m
+            memory: 50Mi
+        volumeMounts:
+        - name: item-storage
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: item-storage
+        persistentVolumeClaim:
+          claimName: item-pvc
+      nodeSelector:
+        web: item
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: item-svc
+  namespace: frontend
+spec:
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30120
+  selector:
+    app: item-web
